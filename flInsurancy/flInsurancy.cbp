@@ -31,6 +31,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="FileSystem.hpp" />
+		<Unit filename="config.hpp" />
+		<Unit filename="rule.hpp" />
+		<Unit filename="source.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1434857909 source:e:\projects\flinsurancy\flinsurancy\source.cpp
+	<memory>
+	<memory.h>
+	<iostream>
+	"rule.hpp"
+
+1434858335 e:\projects\flinsurancy\flinsurancy\filesystem.hpp
+	"config.hpp"
+	<windows.h>
+	<cstdio>
+	<io.h>
+	<errno.h>
+
+1434852235 e:\projects\flinsurancy\flinsurancy\config.hpp
+
+1434855851 e:\projects\flinsurancy\flinsurancy\rule.hpp
+	"FileSystem.hpp"
+
