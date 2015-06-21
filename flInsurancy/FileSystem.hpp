@@ -90,7 +90,10 @@ namespace flins
 
 			qwFileOffset = 0;
 
-			DWORD dwBlockBytes = 1000 * dwGran;
+			file_size fileSizeMode = fileSize - (fileSize % dwGran);
+			if (fileSizeMode < fileSize)
+				fileSizeMode += dwGran;
+			DWORD dwBlockBytes = fileSizeMode;
 			if (fileSize < dwBlockBytes)
 				dwBlockBytes = DWORD(fileSize);
 			if (qwFileOffset >= 0)

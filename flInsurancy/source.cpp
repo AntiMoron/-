@@ -6,7 +6,7 @@
 using namespace flins;
 
 
-class SampleRule : public FileRule
+class SampleEncodeRule : public FileRule
 {
 	file_size getOutputFileSize(file_size origin) const throw()
 	{
@@ -30,26 +30,65 @@ class SampleRule : public FileRule
 	}
 };
 
+class SampleDecodeRule : public FileRule
+{
+	file_size getOutputFileSize(file_size origin) const throw()
+	{
+		return origin - 1;
+	}
+	void operateFiles(const FileMappingSystem& src,
+		const FileMappingSystem& dest)
+	{
+		file_size fileSize = src.getFileSize();
+		byte* sp = src[1];
+		byte* op = dest[0];
+		memcpy(op, sp, fileSize - 1);
+	}
+};
+
+
+
 int main(int cmdCount,char* argv[])
 {
-	try
+	if(cmdCount != 4)
 	{
-		typedef FileMappingSystem::byte byte;
-		FileMappingSystem s("123.wmv",READ_WRITE_MODE);
-		auto sampleRule = std::make_shared<SampleRule>();
-		RuleExecutor::execute(sampleRule.get(),
-					s,"output.wmv");
+		std::cout << "Usage:\n"
+		"executable encode srcPath destPath\n"
+		"executable decode srcPath destPath\n"<< std::endl;
+		return -1;
 	}
-	catch(unsigned long e)
+	if (strcmp(argv[1],"encode") == 0)
 	{
-		std::cout << "Error: File not found" << e;
+		try
+		{
+			typedef FileMappingSystem::byte byte;
+			FileMappingSystem s(argv[2], READ_WRITE_MODE);
+			std::cout << "File Mapped." << std::endl;
+			auto sampleRule = std::make_shared<SampleEncodeRule>();
+			RuleExecutor::execute(sampleRule.get(),
+				s, argv[3]);
+		}
+		catch (unsigned long e)
+		{
+			std::cout << "Error: File not found" << e;
+		}
 	}
-//	if(cmdCount != 3)
-//	{
-//		std::cout << "Usage:\n"
-//		"executable srcPath destPath\n" << std::endl;
-//		return -1;
-//	}
+	else if (strcmp(argv[1], "decode") == 0)
+	{
+		try
+		{
+			typedef FileMappingSystem::byte byte;
+			FileMappingSystem s(argv[2], READ_WRITE_MODE);
+			std::cout << "File Mapped." << std::endl;
+			auto sampleRule = std::make_shared<SampleDecodeRule>();
+			RuleExecutor::execute(sampleRule.get(),
+				s, argv[3]);
+		}
+		catch (unsigned long e)
+		{
+			std::cout << "Error: File not found" << e;
+		}
+	}
 	return 0;
 }
 
