@@ -3,10 +3,12 @@
 
 #ifdef _WIN32
 #define WIN_OS
-#else
-#ifdef _LINUX
+#elif __linux__
 #define LIN_OS
-#endif // _LINUX
+#elif __unix__
+#define UNIX_OS
+#elif __APPLE__
+#define MAC_OS
 #endif // _WIN32
 
 #endif // CONFIG_HPP

@@ -1,10 +1,7 @@
 #ifndef FILESYSTEM_HPP
 #define FILESYSTEM_HPP
-
 #include"config.hpp"
-#include<windows.h>
-#include<cstdio>
-#include<io.h>
+
 namespace flins
 {
 	enum OPEN_MODE
@@ -12,7 +9,10 @@ namespace flins
 		READ_MODE,
 		READ_WRITE_MODE
 	};
-//	#ifdef WIN_OS
+	#ifdef WIN_OS
+	#include<windows.h>
+	#include<cstdio>
+	#include<io.h>
 	class FileMappingSystem
 	{
 	public:
@@ -132,7 +132,88 @@ namespace flins
 		file_size qwFileOffset;
 		file_size fileSize;
 	};
-//	#endif // WIN_OS
+	#endif // WIN_OS
+
+//	#ifdef LINUX_OS
+	#include <sys/mman.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+    class FileMappingSystem
+    {
+    public:
+		typedef off_t file_size;
+		typedef unsigned char byte;
+		static void generateFile(const char* fileName,file_size s)
+		{
+			truncate(fileName, s);
+		}
+
+		FileMappingSystem(const char* fileName,
+					enum OPEN_MODE mode) throw(const char*)
+		{
+			int fd;
+			struct stat sb;
+			off_t offset = 0, pa_offset;
+			size_t length;
+			ssize_t s;
+			switch(mode)
+			{
+			case READ_MODE:
+				fd = open(fileName, O_RDONLY);
+				break;
+			case READ_WRITE_MODE:
+				fd = open(fileName, O_RDWR);
+				break;
+			}
+			if (fd == -1)
+				throw ("open");
+			if (fstat(fd, &sb) == -1)           /* To obtain file size */
+				throw ("fstat");
+			pa_offset = offset & ~(sysconf(_SC_PAGE_SIZE) - 1);
+			/* offset for mmap() must be page aligned */
+			if (offset >= sb.st_size)
+			{
+				throw (stderr, "offset is past end of file\n");
+			}
+			fileSize = sb.st_size;
+			length = sb.st_size - offset;
+			addr = reinterpret_cast<byte*>(mmap(NULL, length + offset - pa_offset, PROT_READ,
+						MAP_PRIVATE, fd, pa_offset));
+			if (addr == MAP_FAILED)
+				throw ("mmap");
+			s = write(STDOUT_FILENO, addr + offset - pa_offset, length);
+			if (s != length) {
+				if (s == -1)
+					throw ("write");
+				throw ("partial write");
+			}
+			exit(EXIT_SUCCESS);
+		}
+
+        byte* operator [] (file_size pos) const
+        {
+			return addr + pos;
+        }
+
+		file_size getFileOffset()const
+		{
+			return fileOffset;
+		}
+		file_size getFileSize() const
+		{
+			return fileSize;
+		}
+	private:
+		byte *addr;
+		file_size fileOffset;
+		file_size fileSize;
+    };
+
+//	#endif // LINUX_OS
 }
 
 #endif // FILESYSTEM_HPP

@@ -68,9 +68,13 @@ int main(int cmdCount,char* argv[])
 			RuleExecutor::execute(sampleRule.get(),
 				s, argv[3]);
 		}
+		catch(const char* e)
+		{
+			std::cout << "Error:" << e << std::endl;
+		}
 		catch (unsigned long e)
 		{
-			std::cout << "Error: File not found" << e;
+			std::cout << "Error: File not found" << e << std::endl;
 		}
 	}
 	else if (strcmp(argv[1], "decode") == 0)
@@ -91,4 +95,3 @@ int main(int cmdCount,char* argv[])
 	}
 	return 0;
 }
-
