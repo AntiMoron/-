@@ -1,5 +1,6 @@
 #ifndef RULE_HPP
 #define RULE_HPP
+#include<iostream>
 #include"FileSystem.hpp"
 namespace flins
 {
@@ -22,7 +23,9 @@ namespace flins
 						const char* dest)
 		{
 			FileMappingSystem::generateFile(dest,rule->getOutputFileSize(src.getFileSize()));
+			std::cout << "File Created." << std::endl;
 			FileMappingSystem o(dest,READ_WRITE_MODE);
+			std::cout << "Output File Mapped." << std::endl;
 			rule->operateFiles(src,o);
 		}
 	};

@@ -144,11 +144,28 @@ namespace flins
 	#include <unistd.h>
     class FileMappingSystem
     {
+    private:
+		struct MappedByte
+		{
+			unsigned char data;
+			MappedByte(){}
+			MappedByte(unsigned char d)
+			{
+				data = d;
+			}
+			MappedByte& operator = (unsigned char d)
+			{
+				data = d;
+				return *this;
+			}
+		};
     public:
 		typedef off_t file_size;
-		typedef unsigned char byte;
+		typedef MappedByte byte;
 		static void generateFile(const char* fileName,file_size s)
 		{
+			FILE* fp = fopen(fileName,"w");
+			fclose(fp);
 			truncate(fileName, s);
 		}
 
@@ -181,17 +198,15 @@ namespace flins
 			}
 			fileSize = sb.st_size;
 			length = sb.st_size - offset;
-			addr = reinterpret_cast<byte*>(mmap(NULL, length + offset - pa_offset, PROT_READ,
+			int flag = PROT_READ;
+			if(READ_WRITE_MODE == mode)
+			{
+				flag |= PROT_WRITE;
+			}
+			addr = reinterpret_cast<byte*>(mmap(NULL, length + offset - pa_offset, flag,
 						MAP_PRIVATE, fd, pa_offset));
 			if (addr == MAP_FAILED)
 				throw ("mmap");
-			s = write(STDOUT_FILENO, addr + offset - pa_offset, length);
-			if (s != length) {
-				if (s == -1)
-					throw ("write");
-				throw ("partial write");
-			}
-			exit(EXIT_SUCCESS);
 		}
 
         byte* operator [] (file_size pos) const

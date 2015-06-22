@@ -1,6 +1,5 @@
 #include<memory>
 #include<memory.h>
-#include<iostream>
 #include"rule.hpp"
 
 using namespace flins;
@@ -16,17 +15,17 @@ class SampleEncodeRule : public FileRule
 					const FileMappingSystem& dest)
 	{
 		file_size fileSize = src.getFileSize();
-		file_size blockSize = 1024 * 1024;
-		file_size times = fileSize / blockSize;
-		file_size tail = fileSize % blockSize;
-		for(file_size t = 0;t < times; ++t)
+		for(file_size i = 0;i<10;i++)
 		{
-			byte* sp = src[blockSize * t];
-			byte* op = dest[blockSize * t + 1];
-			memcpy(op,sp,blockSize);
+			printf("%X ",*src[i]);
 		}
-		memcpy(src[blockSize * times],
-				dest[blockSize * times + 1],tail);
+		std::cout << std::endl << std::endl;
+//		memcpy(src[0], dest[1],fileSize);
+		*dest[0] = 0xfa;
+		for(file_size i = 0;i<10;i++)
+		{
+			printf("%X ",*dest[i]);
+		}
 	}
 };
 
@@ -42,6 +41,11 @@ class SampleDecodeRule : public FileRule
 		file_size fileSize = src.getFileSize();
 		byte* sp = src[1];
 		byte* op = dest[0];
+
+		for(file_size i = 0;i<10;i++)
+		{
+			printf("%X ",*src[i]);
+		}
 		memcpy(op, sp, fileSize - 1);
 	}
 };
@@ -63,7 +67,8 @@ int main(int cmdCount,char* argv[])
 		{
 			typedef FileMappingSystem::byte byte;
 			FileMappingSystem s(argv[2], READ_WRITE_MODE);
-			std::cout << "File Mapped." << std::endl;
+			std::cout << "File Mapped!\nFile Size: " << s.getFileSize()
+				<< "Byte(s)" << std::endl;
 			auto sampleRule = std::make_shared<SampleEncodeRule>();
 			RuleExecutor::execute(sampleRule.get(),
 				s, argv[3]);
@@ -83,10 +88,15 @@ int main(int cmdCount,char* argv[])
 		{
 			typedef FileMappingSystem::byte byte;
 			FileMappingSystem s(argv[2], READ_WRITE_MODE);
-			std::cout << "File Mapped." << std::endl;
+			std::cout << "File Mapped!\nFile Size: " << s.getFileSize()
+				<< "Byte(s)" << std::endl;
 			auto sampleRule = std::make_shared<SampleDecodeRule>();
 			RuleExecutor::execute(sampleRule.get(),
 				s, argv[3]);
+		}
+		catch(const char* e)
+		{
+			std::cout << "Error:" << e << std::endl;
 		}
 		catch (unsigned long e)
 		{
