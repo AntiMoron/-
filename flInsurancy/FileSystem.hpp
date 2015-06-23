@@ -144,24 +144,9 @@ namespace flins
 	#include <unistd.h>
     class FileMappingSystem
     {
-    private:
-		struct MappedByte
-		{
-			unsigned char data;
-			MappedByte(){}
-			MappedByte(unsigned char d)
-			{
-				data = d;
-			}
-			MappedByte& operator = (unsigned char d)
-			{
-				data = d;
-				return *this;
-			}
-		};
     public:
 		typedef off_t file_size;
-		typedef MappedByte byte;
+		typedef unsigned char byte;
 		static void generateFile(const char* fileName,file_size s)
 		{
 			FILE* fp = fopen(fileName,"w");
