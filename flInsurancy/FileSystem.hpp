@@ -12,7 +12,10 @@ namespace flins
 	#ifdef WIN_OS
 	#include<windows.h>
 	#include<cstdio>
-	#include<io.h>
+	#include <io.h>
+	#include <fcntl.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
 	class FileMappingSystem
 	{
 	public:
@@ -23,34 +26,19 @@ namespace flins
 		{
 			FILE* fp = NULL;
 			fopen_s(&fp, fileName, "wb");
-			if(s > 1024)
-			{
-				file_size bufSize = 1024 * 1024;
-				file_size times = (s / bufSize);
-				file_size tail = (s % bufSize);
-				while(times > 30)
-				{
-					bufSize *= 2;
-					times = (s / bufSize);
-					tail = (s % bufSize);
-				}
-				byte* chBuf = new byte[bufSize];
-				while(times--)
-				{
-					fwrite(chBuf,bufSize,1,fp);
-				}
-				byte ch;
-				while(tail--)
-					fwrite(&ch,sizeof(ch),1,fp);
-				delete [] chBuf;
-			}
-			else
-			{
-				byte ch;
-				while(s--)
-					fwrite(&ch,sizeof(ch),1,fp);
-			}
 			fclose(fp);
+			int fileDesc;
+			if (_sopen_s(&fileDesc, fileName, _O_RDWR | _O_CREAT, _SH_DENYNO,
+				_S_IREAD | _S_IWRITE) == 0)
+			{
+				if (_chsize(fileDesc, s) != 0)
+				{
+					_close(fileDesc);
+					throw ("Problem in changing the size\n");
+				}
+				else
+					_close(fileDesc);
+			}
 		}
 
 		FileMappingSystem(const char* fileName,
