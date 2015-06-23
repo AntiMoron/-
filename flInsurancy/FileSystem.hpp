@@ -134,7 +134,7 @@ namespace flins
 	};
 	#endif // WIN_OS
 
-//	#ifdef LINUX_OS
+	#ifdef LINUX_OS
 	#include <sys/mman.h>
 	#include <sys/types.h>
 	#include <sys/stat.h>
@@ -229,7 +229,7 @@ namespace flins
 		file_size fileSize;
     };
 
-//	#endif // LINUX_OS
+	#endif // LINUX_OS
 }
 
 #endif // FILESYSTEM_HPP
