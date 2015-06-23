@@ -15,16 +15,10 @@ class SampleEncodeRule : public FileRule
 					const FileMappingSystem& dest)
 	{
 		file_size fileSize = src.getFileSize();
+		memcpy(dest[1], src[0],fileSize);
 		for(file_size i = 0;i<10;i++)
 		{
 			printf("%X ",*src[i]);
-		}
-		std::cout << std::endl << std::endl;
-//		memcpy(src[0], dest[1],fileSize);
-		*dest[0] = 0xfa;
-		for(file_size i = 0;i<10;i++)
-		{
-			printf("%X ",*dest[i]);
 		}
 	}
 };
@@ -41,7 +35,6 @@ class SampleDecodeRule : public FileRule
 		file_size fileSize = src.getFileSize();
 		byte* sp = src[1];
 		byte* op = dest[0];
-
 		for(file_size i = 0;i<10;i++)
 		{
 			printf("%X ",*src[i]);

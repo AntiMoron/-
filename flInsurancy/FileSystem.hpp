@@ -172,7 +172,6 @@ namespace flins
 		FileMappingSystem(const char* fileName,
 					enum OPEN_MODE mode) throw(const char*)
 		{
-			int fd;
 			struct stat sb;
 			off_t offset = 0, pa_offset;
 			size_t length;
@@ -180,15 +179,15 @@ namespace flins
 			switch(mode)
 			{
 			case READ_MODE:
-				fd = open(fileName, O_RDONLY);
+				file = open(fileName, O_RDONLY, S_IRUSR);
 				break;
 			case READ_WRITE_MODE:
-				fd = open(fileName, O_RDWR);
+				file = open(fileName, O_RDWR, S_IRUSR | S_IWUSR);
 				break;
 			}
-			if (fd == -1)
+			if (file == -1)
 				throw ("open");
-			if (fstat(fd, &sb) == -1)           /* To obtain file size */
+			if (fstat(file, &sb) == -1)           /* To obtain file size */
 				throw ("fstat");
 			pa_offset = offset & ~(sysconf(_SC_PAGE_SIZE) - 1);
 			/* offset for mmap() must be page aligned */
@@ -198,15 +197,16 @@ namespace flins
 			}
 			fileSize = sb.st_size;
 			length = sb.st_size - offset;
-			int flag = PROT_READ;
-			if(READ_WRITE_MODE == mode)
-			{
-				flag |= PROT_WRITE;
-			}
-			addr = reinterpret_cast<byte*>(mmap(NULL, length + offset - pa_offset, flag,
-						MAP_PRIVATE, fd, pa_offset));
+			int flag = (mode == READ_WRITE_MODE) ? PROT_WRITE : PROT_READ;
+			addr = reinterpret_cast<byte*>(
+					mmap(NULL, length + offset - pa_offset, flag,
+						MAP_SHARED, file, pa_offset));
 			if (addr == MAP_FAILED)
 				throw ("mmap");
+		}
+		~FileMappingSystem()
+		{
+			close(file);
 		}
 
         byte* operator [] (file_size pos) const
@@ -223,6 +223,7 @@ namespace flins
 			return fileSize;
 		}
 	private:
+		int file;
 		byte *addr;
 		file_size fileOffset;
 		file_size fileSize;
